@@ -55,6 +55,13 @@ function displayMessages(messages) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+function clearChat() {
+    localStorage.removeItem("chatMessages");
+    displayMessages([]);
+}
+
+document.querySelector('#deleteButton').addEventListener("click", clearChat)
+
 // https://github.com/codesandbox/codesandbox-client/issues/4683
 // window.onload = function () {
 setTimeout(() => {
