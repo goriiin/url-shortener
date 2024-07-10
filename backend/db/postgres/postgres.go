@@ -3,16 +3,12 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"github.com/goriiin/myapp/backend/internal/storage/postgres/config"
+	"github.com/goriiin/myapp/backend/db/postgres/config"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type Storage struct {
-	db *pgxpool.Pool
-}
-
-func New() (*Storage, error) {
-	const op = "storage.postgres.New"
+func New() (*pgxpool.Pool, error) {
+	const op = "repository.postgres.New"
 
 	cfg, err := config.NewStorageConfig()
 	if err != nil {
@@ -35,9 +31,7 @@ func New() (*Storage, error) {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return &Storage{
-		db: db,
-	}, nil
+	return db, nil
 }
 
 const (
@@ -54,9 +48,9 @@ const (
 	rm = `drop table if exists url;`
 )
 
-func (s *Storage) RmTables() error {
-	const op = "storage.postgres.RmTables"
-	if _, err := s.db.Exec(context.Background(), rm); err != nil {
+func RmTables(db *pgxpool.Pool) error {
+	const op = "repository.postgres.RmTables"
+	if _, err := db.Exec(context.Background(), rm); err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
 	return nil

@@ -22,7 +22,7 @@ type StorageConfig struct {
 }
 
 func NewStorageConfig() (StorageConfig, error) {
-	const op = "storage.postgres.config.NewStorageConfig"
+	const op = "repository.postgres.config.NewStorageConfig"
 
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -41,7 +41,7 @@ func NewStorageConfig() (StorageConfig, error) {
 }
 
 func NewPoolConfig(cfg *StorageConfig) (*pgxpool.Config, error) {
-	const op = "storage.postgres.config.NewPoolConfig"
+	const op = "repository.postgres.config.NewPoolConfig"
 
 	connStr := fmt.Sprintf("%s://%s:%s@%s:%s/%s?sslmode=disable&connect_timeout=%d",
 		"postgres",
@@ -61,7 +61,7 @@ func NewPoolConfig(cfg *StorageConfig) (*pgxpool.Config, error) {
 }
 
 func NewConnection(poolConfig *pgxpool.Config) (*pgxpool.Pool, error) {
-	const op = "storage.postgres.config.NewConnection"
+	const op = "repository.postgres.config.NewConnection"
 
 	conn, err := pgxpool.NewWithConfig(context.Background(), poolConfig)
 	if err != nil {
