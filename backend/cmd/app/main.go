@@ -35,7 +35,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Welcome to the homepage!")
+		_, _ = fmt.Fprintf(w, "Welcome to the homepage!")
 	})
 
 	mux.HandleFunc("/redirect", func(w http.ResponseWriter, r *http.Request) {
@@ -44,16 +44,18 @@ func main() {
 	})
 
 	mux.HandleFunc("/profile", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "This is your profile page!")
+		_, _ = fmt.Fprintf(w, "This is your profile page!")
 	})
-	middlewareChain := middleware.New(log)
+	loggerMiddleware := middleware.New(log)
+	middlewareRec := middleware.NewRec(log)
+	_ = middlewareRec
 
 	srv := &http.Server{
 		Addr:         cfg.HTTPServer.Address + ":" + cfg.HTTPServer.Port,
 		WriteTimeout: cfg.HTTPServer.Timeout,
 		ReadTimeout:  cfg.HTTPServer.Timeout,
 		IdleTimeout:  cfg.HTTPServer.Timeout,
-		Handler:      middlewareChain(mux),
+		Handler:      middlewareRec(loggerMiddleware(mux)),
 	}
 
 	path := "http://" + cfg.HTTPServer.Address + ":" + cfg.HTTPServer.Port
