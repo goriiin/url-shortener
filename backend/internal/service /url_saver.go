@@ -1,4 +1,4 @@
-package shortener
+package service_
 
 import (
 	"crypto/sha256"
@@ -9,12 +9,18 @@ import (
 )
 
 type URL struct {
-	Url   string `json:"URL"`
+	Url   string `json:"url"`
 	Alias string `json:"alias"`
 }
 
-type URLSaver struct {
+type urlSaver struct {
 	storage postgres.Storage
+}
+
+func NewUrlSaverService(storage postgres.Storage) *urlSaver {
+	return &urlSaver{
+		storage: storage,
+	}
 }
 
 func getUniqueAlias(str string) string {
@@ -22,7 +28,7 @@ func getUniqueAlias(str string) string {
 	return base64.RawURLEncoding.EncodeToString(hash[:6])
 }
 
-func (u *URLSaver) SaveURL(urlToSave string, alias string) error {
+func (u *urlSaver) SaveURL(urlToSave string, alias string) error {
 	const op = "service.Saver.SaveURL"
 	if urlToSave == "" {
 		return fmt.Errorf("op: %s - empty url to save", op)
@@ -39,7 +45,7 @@ func (u *URLSaver) SaveURL(urlToSave string, alias string) error {
 	return nil
 }
 
-func (u *URLSaver) RemoveURL(urlToRemove string) error {
+func (u *urlSaver) RemoveURL(urlToRemove string) error {
 	const op = "service.Shortener.RemoveURL"
 
 	err := u.storage.RemoveURL(urlToRemove)
@@ -49,7 +55,8 @@ func (u *URLSaver) RemoveURL(urlToRemove string) error {
 	return nil
 }
 
-func (u *URLSaver) EditURL(savedURL string, newAlias string) error {
+// EditURL TODO: возврат измененного Alias
+func (u *urlSaver) EditURL(savedURL string, newAlias string) error {
 	const op = "service.Shortener.EditURL"
 	if newAlias == "" {
 		return fmt.Errorf("op: %s - empty new alias", op)
@@ -61,8 +68,8 @@ func (u *URLSaver) EditURL(savedURL string, newAlias string) error {
 	return u.storage.EditURL(savedURL, newAlias)
 }
 
-func (u *URLSaver) GetURL(alias string) (*URL, error) {
-	const op = "service.shortener.URLSaver.GetURL"
+func (u *urlSaver) GetURL(alias string) (*URL, error) {
+	const op = "service.shortener.urlSaver.GetURL"
 
 	storeURL, err := u.storage.GetURL(alias)
 	if err != nil {

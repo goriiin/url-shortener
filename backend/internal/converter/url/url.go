@@ -2,7 +2,7 @@ package url
 
 import (
 	"github.com/goriiin/myapp/backend/internal/repository/postgres"
-	service "github.com/goriiin/myapp/backend/internal/service /shortener"
+	service "github.com/goriiin/myapp/backend/internal/service "
 )
 
 func StorageToService(url *postgres.URL) *service.URL {
