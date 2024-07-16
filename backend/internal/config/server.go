@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+// TODO :сделать настройки через env
+
 type Server struct {
 	Env        string `yaml:"env" env-required:"true"`
 	HTTPServer `yaml:"http_server" env-required:"true"`

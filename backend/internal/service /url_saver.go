@@ -8,9 +8,9 @@ import (
 	"github.com/goriiin/myapp/backend/internal/repository/postgres"
 )
 
-type URL struct {
-	Url   string `json:"url"`
-	Alias string `json:"alias"`
+type Url struct {
+	Url   string `json:"url" validate:"required,url"`
+	Alias string `json:"alias,omitempty"`
 }
 
 type urlSaver struct {
@@ -68,7 +68,7 @@ func (u *urlSaver) EditURL(savedURL string, newAlias string) error {
 	return u.storage.EditURL(savedURL, newAlias)
 }
 
-func (u *urlSaver) GetURL(alias string) (*URL, error) {
+func (u *urlSaver) GetURL(alias string) (*Url, error) {
 	const op = "service.shortener.urlSaver.GetURL"
 
 	storeURL, err := u.storage.GetURL(alias)
