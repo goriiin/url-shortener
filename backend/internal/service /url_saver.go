@@ -1,11 +1,10 @@
 package service_
 
 import (
-	"crypto/sha256"
-	"encoding/base64"
 	"fmt"
 	converter "github.com/goriiin/myapp/backend/internal/converter/url"
 	"github.com/goriiin/myapp/backend/internal/repository/postgres"
+	"github.com/goriiin/myapp/backend/pkg/random"
 )
 
 type Url struct {
@@ -14,28 +13,32 @@ type Url struct {
 }
 
 type urlSaver struct {
-	storage postgres.Storage
+	storage URLRepository
 }
 
-func NewUrlSaverService(storage postgres.Storage) *urlSaver {
+// URLRepository TODO: структуру postgres.URL в другое место
+type URLRepository interface {
+	SaveURL(urlToSave string, alias string) error
+	RemoveURL(urlToRemove string) error
+	EditURL(savedURL string, newAlias string) error
+	GetURL(alias string) (*postgres.URL, error)
+}
+
+func NewUrlSaverService(storage URLRepository) *urlSaver {
 	return &urlSaver{
 		storage: storage,
 	}
 }
 
-func getUniqueAlias(str string) string {
-	hash := sha256.Sum256([]byte(str))
-	return base64.RawURLEncoding.EncodeToString(hash[:6])
-}
-
 func (u *urlSaver) SaveURL(urlToSave string, alias string) error {
+
 	const op = "service.Saver.SaveURL"
 	if urlToSave == "" {
 		return fmt.Errorf("op: %s - empty url to save", op)
 	}
 
 	if alias == "" {
-		alias = getUniqueAlias(urlToSave)
+		alias = random.GetUniqueAlias(urlToSave)
 	}
 
 	err := u.storage.SaveURL(urlToSave, alias)

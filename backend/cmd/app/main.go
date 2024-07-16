@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
 	config2 "github.com/goriiin/myapp/backend/db/postgres"
+	"github.com/goriiin/myapp/backend/internal/app/handlers"
 	"github.com/goriiin/myapp/backend/internal/app/middleware"
 	"github.com/goriiin/myapp/backend/internal/config"
+	service "github.com/goriiin/myapp/backend/internal/service "
 	"github.com/goriiin/myapp/backend/pkg/sl"
 	"log/slog"
 	"net/http"
@@ -30,22 +31,34 @@ func main() {
 	//	log.Error("error removing tables", sl.Err(err))
 	//}
 
-	_ = storage
+	serv = service.NewUrlSaverService(storage)
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		_, _ = fmt.Fprintf(w, "Welcome to the homepage!")
-	})
+	mux.HandleFunc("/url", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			handlers.New(log)
+		case http.MethodPost:
 
-	mux.HandleFunc("/redirect", func(w http.ResponseWriter, r *http.Request) {
-		// Перенаправляем запрос на страницу профиля пользователя
-		http.Redirect(w, r, "/profile", http.StatusFound)
-	})
+		case http.MethodPut:
 
-	mux.HandleFunc("/profile", func(w http.ResponseWriter, r *http.Request) {
-		_, _ = fmt.Fprintf(w, "This is your profile page!")
+		case http.MethodDelete:
+
+		}
 	})
+	//mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	//	_, _ = fmt.Fprintf(w, "Welcome to the homepage!")
+	//})
+	//
+	//mux.HandleFunc("/redirect", func(w http.ResponseWriter, r *http.Request) {
+	//	// Перенаправляем запрос на страницу профиля пользователя
+	//	http.Redirect(w, r, "/profile", http.StatusFound)
+	//})
+	//
+	//mux.HandleFunc("/profile", func(w http.ResponseWriter, r *http.Request) {
+	//	_, _ = fmt.Fprintf(w, "This is your profile page!")
+	//})
 	loggerMiddleware := middleware.New(log)
 	middlewareRec := middleware.NewRec(log)
 	_ = middlewareRec
