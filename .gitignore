@@ -1,5 +1,3 @@
 .env
 
-backend/configs/local.yaml
-
-backend/configs/postgres.yaml
+*.yaml

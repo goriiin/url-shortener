@@ -1,0 +1,6 @@
+env: "local" # local, dev, prod
+http_server:
+  address: "HOST"
+  port: "PORT"
+  timeout: 4s # время чтения запроса и отправки ответа
+  idle_timeout: 60s # время соединения
