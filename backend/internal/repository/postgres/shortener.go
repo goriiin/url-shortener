@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/goriiin/myapp/backend/db/postgres"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"os"
 	"time"
 )
 
@@ -13,14 +14,16 @@ const (
 	updateAlias = `update url set alias = $1 where url = $2;`
 	deleteURL   = `delete from url where url = $1;`
 	getByURL    = `select id, url.url, alias, created_at from url where url = $1;`
-	getByAlias  = `select id, url.url, alias, created_at from url where alias = $1;`
+	getByAlias  = `select id, url.url, alias, created_at
+					from url 
+					where alias = $1;`
 )
 
 type URL struct {
 	Id        int64     `db:"id"`
+	Alias     string    `db:"alias"`
 	Url       string    `db:"url"`
 	CreatedAt time.Time `db:"created_at"`
-	Alias     string    `db:"alias"`
 }
 
 type Storage struct {
@@ -28,9 +31,12 @@ type Storage struct {
 }
 
 func New() *Storage {
+	const op = "repository.postgres.New"
+
 	db, err := postgres.New()
 	if err != nil {
-		panic(err)
+		_ = fmt.Errorf("op: %s - err: %w", op, err)
+		os.Exit(2)
 	}
 
 	return &Storage{db}
@@ -58,15 +64,15 @@ func (s *Storage) RemoveURL(urlToRemove string) error {
 	return nil
 }
 
-func (s *Storage) EditURL(savedURL string, newAlias string) error {
+func (s *Storage) EditURL(savedURL string, newAlias string) (*string, error) {
 	const op = "repository.postgres.EditURL"
 
 	_, err := s.db.Exec(context.Background(), updateAlias, newAlias, savedURL)
 	if err != nil {
-		return fmt.Errorf("%s: %s\n", op, err)
+		return nil, fmt.Errorf("%s: %s\n", op, err)
 	}
 
-	return nil
+	return &newAlias, nil
 }
 
 func (s *Storage) GetURL(alias string) (*URL, error) {
@@ -76,9 +82,17 @@ func (s *Storage) GetURL(alias string) (*URL, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s: %s\n", op, err)
 	}
-	row.Close()
 
 	var url URL
+	if !row.Next() {
+		fmt.Println("No rows found")
+		return &URL{
+			Id:        -1,
+			Url:       "",
+			Alias:     alias,
+			CreatedAt: time.Now(),
+		}, nil
+	}
 	err = row.Scan(&url.Id, &url.Url, &url.Alias, &url.CreatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %s\n", op, err)
@@ -89,14 +103,12 @@ func (s *Storage) GetURL(alias string) (*URL, error) {
 
 func (s *Storage) GetAlias(savedURL string) (*URL, error) {
 	const op = "repository.postgres.GetAlias"
-	row, err := s.db.Query(context.Background(), getByURL, savedURL)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %s\n", op, err)
-	}
-	defer row.Close()
+	row := s.db.QueryRow(context.Background(), getByURL, savedURL)
 	var url URL
+	err := row.Scan(&url.Id, &url.Url, &url.Alias, &url.CreatedAt)
 
-	err = row.Scan(&url.Id, &url.Url, &url.Alias, &url.CreatedAt)
+	fmt.Println("_________\n", row)
+	fmt.Println(url)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %s\n", op, err)
 	}
