@@ -46,7 +46,8 @@ func Save(log *slog.Logger, serv service.URLSaver) http.HandlerFunc {
 
 		// валидация обязательного поля
 		if err = validator.New().Struct(req); err != nil {
-			validationErrors := err.(validator.ValidationErrors)
+			var validationErrors validator.ValidationErrors
+			errors.As(err, &validationErrors)
 			log.Error("fail to validate request body", sl.Err(err))
 
 			w.Header().Set("Content-Type", "application/json")
@@ -103,7 +104,8 @@ func Edit(log *slog.Logger, serv service.URLSaver) http.HandlerFunc {
 
 		// валидация обязательного поля
 		if err = validator.New().Struct(req); err != nil {
-			validationErrors := err.(validator.ValidationErrors)
+			var validationErrors validator.ValidationErrors
+			errors.As(err, &validationErrors)
 			log.Error("fail to validate request body", sl.Err(err))
 
 			w.Header().Set("Content-Type", "application/json")
