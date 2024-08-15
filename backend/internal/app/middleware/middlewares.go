@@ -19,7 +19,7 @@ func requestIDMiddleware(next http.Handler) http.Handler {
 }
 
 // NewRec TODO: Recover - восстановка паники - нужен тест
-func NewRec(log *slog.Logger) func(http.Handler) http.Handler {
+func RecoverMiddleware(log *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			defer func() {

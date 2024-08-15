@@ -25,6 +25,9 @@ func main() {
 	serv := service.NewUrlSaverService(storage)
 
 	mux := http.NewServeMux()
+	mux.HandleFunc("/{alias}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.RedirectHandlerfunc(log, serv)(w, r)
+	})
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
@@ -40,8 +43,7 @@ func main() {
 	})
 
 	loggerMiddleware := middleware.New(log)
-	middlewareRec := middleware.NewRec(log)
-	_ = middlewareRec
+	middlewareRec := middleware.RecoverMiddleware(log)
 
 	srv := &http.Server{
 		Addr:         cfg.HTTPServer.Address + ":" + cfg.HTTPServer.Port,
